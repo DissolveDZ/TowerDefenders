@@ -14,7 +14,7 @@ public class CameraMovement : MonoBehaviour
     Vector3 cam_desired = Vector3.zero;
     public float cam_lerp = 25f;
     public float zoom_dist = 1f;
-    public float minimal_dist = 3f;
+    public float zoom_offset = 3f;
     public GameObject sphere;
     Vector3 mouse_pos = Vector3.zero;
     Vector2 last_mouse = Vector2.zero;
@@ -40,19 +40,17 @@ public class CameraMovement : MonoBehaviour
         if (Input.GetMouseButton(2))
         {
             cam_desired -= new Vector3(Input.GetAxis("Mouse X"), 0, Input.GetAxis("Mouse Y")) * 0.05f * (zoom_dist * zoom_dist);
-            print("paypal");
         }
         // Add mouse delta to the mouse position
         zoom_dist -= Input.mouseScrollDelta.y * zoom_dist *0.1f;
         zoom_dist = Mathf.Clamp(zoom_dist, 0.5f, 100);
-        cur_cam.transform.position = Vector3.Lerp(cur_cam.transform.position, cam_desired - cur_cam.transform.forward * (zoom_dist * zoom_dist) + cur_cam.transform.forward * minimal_dist, cam_lerp * Time.deltaTime);
+        cur_cam.transform.position = Vector3.Lerp(cur_cam.transform.position, cam_desired - cur_cam.transform.forward * (zoom_dist * zoom_dist) + cur_cam.transform.forward * zoom_offset, cam_lerp * Time.deltaTime);
         ray = Camera.main.ScreenPointToRay(mouse_pos);
         // Raycast
         if (Physics.Raycast(ray, out ray_hit, Mathf.Infinity))
         {
             sphere.transform.position = ray_hit.point;
             cur_ray = ray_hit.point;
-            Debug.Log(ray_hit.transform.name);
         }
         // Calc mouse delta
         mouse_delta = new Vector2(mouse_pos.x, mouse_pos.y) - last_mouse;
