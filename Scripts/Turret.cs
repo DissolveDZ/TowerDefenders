@@ -8,6 +8,7 @@ public class Turret : MonoBehaviour
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
     public GameObject target;
+
     float look_lerp = 0f;
 
     enum State

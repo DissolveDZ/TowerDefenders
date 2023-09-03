@@ -25,24 +25,22 @@ public class CameraMovement : MonoBehaviour
     void Start()
     {
         cur_cam = Camera.main;
-        //cam_desired = cur_cam.transform.position;
         zoom_dist = 1f;
     }
-    void Zoom()
-    {
 
-    }
-
-    // Update is called once per frame
     void Update()
-    {
+    {       
+        // bit shift layer mask
+        int layerMask = 1 << 8;
+        layerMask = ~layerMask;
+
         mouse_pos = Input.mousePosition;
         if (Input.GetMouseButton(2))
         {
             cam_desired -= new Vector3(Input.GetAxis("Mouse X"), 0, Input.GetAxis("Mouse Y")) * 0.05f * (zoom_dist * zoom_dist);
         }
         // Add mouse delta to the mouse position
-        zoom_dist -= Input.mouseScrollDelta.y * zoom_dist *0.1f;
+        zoom_dist -= Input.mouseScrollDelta.y * zoom_dist * 0.1f;
         zoom_dist = Mathf.Clamp(zoom_dist, 0.5f, 100);
         cur_cam.transform.position = Vector3.Lerp(cur_cam.transform.position, cam_desired - cur_cam.transform.forward * (zoom_dist * zoom_dist) + cur_cam.transform.forward * zoom_offset, cam_lerp * Time.deltaTime);
         ray = Camera.main.ScreenPointToRay(mouse_pos);
@@ -56,14 +54,5 @@ public class CameraMovement : MonoBehaviour
         mouse_delta = new Vector2(mouse_pos.x, mouse_pos.y) - last_mouse;
         last_mouse = new Vector2(mouse_pos.x, mouse_pos.y);
         last_ray = cur_ray;
-    }
-
-    void FixedUpdate()
-    {
-        // bit shift layer mask
-        int layerMask = 1 << 8;
-        layerMask = ~layerMask;
-
-
     }
 }
