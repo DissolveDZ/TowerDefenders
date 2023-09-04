@@ -1,28 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 
 public class Turret : MonoBehaviour
 {
     public GameObject Guns;
+    public GameObject RotationPole;
+    public GameObject RadiusSphere;
+    public GameObject target;
+    public bool selected = false;
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
-    public GameObject target;
-
+    public uint ID = 0;
+    [SerializeField]
+    [Range(0f, 40f)]
+    private float radius;
     float look_lerp = 0f;
-
     enum State
     {
         IDLE,
         TARGETING
     }
     State cur_state = State.IDLE;
+
+    private void Awake()
+    {
+        ID = Camera.main.GetComponent<TowerDefenseMain>().AddBuilding(gameObject);
+    }
+
     void Update()
     {
-        if (Vector3.Distance(transform.position, target.transform.position) < 5)
+        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius)
             cur_state = State.TARGETING;
         else
             cur_state = State.IDLE;
+        if (selected)
+        {
+            RadiusSphere.SetActive(true);
+        }
+        else
+            RadiusSphere.SetActive(false);
         switch (cur_state)
         {
             default:
@@ -31,13 +49,13 @@ public class Turret : MonoBehaviour
                 gun_rotation = new Vector3(0, 0, 0);
                 break;
             case State.TARGETING:
-                Vector2 diff = new Vector2(transform.position.x - target.transform.position.x, transform.position.z - target.transform.position.z);
+                Vector2 diff = new Vector2(RotationPole.transform.position.x - target.transform.position.x, RotationPole.transform.position.z - target.transform.position.z);
                 float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
                 desired_rot = new Vector3(-90, 0, -angle);
                 look_lerp = Mathf.Lerp(look_lerp, 0f, 1f * Time.deltaTime);
                 break;
         }
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(desired_rot), 7.5f * Time.deltaTime);
-        Guns.transform.rotation = transform.rotation * Quaternion.Euler(gun_rotation);
+        RotationPole.transform.rotation = Quaternion.Lerp(RotationPole.transform.rotation, Quaternion.Euler(desired_rot), 7.5f * Time.deltaTime);
+        Guns.transform.rotation = RotationPole.transform.rotation * Quaternion.Euler(gun_rotation);
     }
 }
