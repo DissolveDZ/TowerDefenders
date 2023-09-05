@@ -71,7 +71,7 @@ public class SplineMesh : MonoBehaviour
             positions_right.Add(position + right * width);
         }
     }
-
+    // generate mesh by creating triangles and uvs
     private void BuildMesh()
     {
         int length = positions_right.Count;
@@ -88,8 +88,8 @@ public class SplineMesh : MonoBehaviour
             verts[vertIndex] = positions_right[i];
             verts[vertIndex + 1] = positions_left[i];
 
-            float completionPercent = i / (float)(length - 1);
-            float v = 1 - Mathf.Abs(2 * completionPercent - 1);
+            float percent = i / (float)(length - 1);
+            float v = 1 - Mathf.Abs(2 * percent - 1);
             uvs[vertIndex] = new Vector2(0, v);
             uvs[vertIndex + 1] = new Vector2(1, v);
 

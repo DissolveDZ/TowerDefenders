@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
-    // I always initiate to zero since i don't want to mess with unallocated memory but i don't know how unity handles this, should be fine if i don't
     public Camera cur_cam;
     public Vector3 offset = Vector3.zero;
     public Vector3 last_ray = Vector3.zero;
@@ -26,16 +25,18 @@ public class CameraMovement : MonoBehaviour
     Vector2 mouse_delta = Vector2.zero;
     Ray ray;
     RaycastHit ray_hit;
+    LayerMask building_layer;
 
-    void Start()
+    void Awake()
     {
         cur_cam = Camera.main;
         zoom_dist = 1f;
+        building_layer = LayerMask.NameToLayer("Building");
     }
 
     private void Select()
     {
-        List<uint> selected_ptr = Camera.main.GetComponent<TowerDefenseMain>().Selected;
+        List<int> selected_ptr = Camera.main.GetComponent<TowerDefenseMain>().Selected;
         List<GameObject> buildings_ptr = Camera.main.GetComponent<TowerDefenseMain>().Buildings;
         GameObject cur_building;
         if (ray_hit.transform.parent == null)
@@ -45,21 +46,21 @@ public class CameraMovement : MonoBehaviour
         else
         {
             cur_building = ray_hit.transform.parent.gameObject;
-            if (cur_building.layer == 7)
+            if (cur_building.layer == building_layer)
             {
-                if (!cur_building.GetComponent<Turret>().selected)
+                if (!cur_building.GetComponent<Tower>().selected)
                 {
                     bool is_selected = false;
                     for (int i = 0; i < selected_ptr.Count; i++)
                     {
-                        if (selected_ptr[i] == cur_building.GetComponent<Turret>().ID)
+                        if (selected_ptr[i] == cur_building.GetComponent<Tower>().ID)
                         {
                             selected_ptr.RemoveAt(i);
                             is_selected = true;
                         }
                     }
                     if (!is_selected)
-                        selected_ptr.Add(cur_building.GetComponent<Turret>().ID);
+                        selected_ptr.Add(cur_building.GetComponent<Tower>().ID);
                 }
             }
             else
@@ -69,11 +70,11 @@ public class CameraMovement : MonoBehaviour
         }
         for (int i = 0; i < buildings_ptr.Count; i++)
             {
-                buildings_ptr[i].GetComponent<Turret>().selected = false;
+                buildings_ptr[i].GetComponent<Tower>().selected = false;
             }
             for (int i = 0; i < selected_ptr.Count; i++)
             {
-                buildings_ptr[(int)selected_ptr[i]].GetComponent<Turret>().selected = true;
+                buildings_ptr[selected_ptr[i]].GetComponent<Tower>().selected = true;
             }
     }
 

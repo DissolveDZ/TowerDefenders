@@ -6,12 +6,12 @@ using UnityEngine;
 public class TowerDefenseMain : MonoBehaviour
 {
     public List<GameObject> Buildings = new List<GameObject>();
-    public List<uint> Selected = new List<uint>();
+    public List<int> Selected = new List<int>();
 
-    public uint AddBuilding(GameObject obj)
+    public int AddBuilding(GameObject obj)
     {
         Buildings.Add(obj);
-        return (uint)Buildings.Count-1;
+        return Buildings.Count-1;
     }
     void Start()
     {

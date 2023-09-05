@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 
-public class Turret : MonoBehaviour
+public class Turret : Tower
 {
     public GameObject Guns;
     public GameObject RotationPole;
     public GameObject RadiusSphere;
     public GameObject target;
-    public bool selected = false;
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
-    public uint ID = 0;
+
     [SerializeField]
     [Range(0f, 40f)]
     private float radius;
@@ -27,11 +27,12 @@ public class Turret : MonoBehaviour
     private void Awake()
     {
         ID = Camera.main.GetComponent<TowerDefenseMain>().AddBuilding(gameObject);
+        selected = false;
     }
 
     void Update()
     {
-        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius)
+        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius*0.5)
             cur_state = State.TARGETING;
         else
             cur_state = State.IDLE;
@@ -55,6 +56,7 @@ public class Turret : MonoBehaviour
                 look_lerp = Mathf.Lerp(look_lerp, 0f, 1f * Time.deltaTime);
                 break;
         }
+        RadiusSphere.transform.localScale = new Vector3(radius, radius, radius);
         RotationPole.transform.rotation = Quaternion.Lerp(RotationPole.transform.rotation, Quaternion.Euler(desired_rot), 7.5f * Time.deltaTime);
         Guns.transform.rotation = RotationPole.transform.rotation * Quaternion.Euler(gun_rotation);
     }
