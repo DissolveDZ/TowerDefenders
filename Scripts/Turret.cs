@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using static UnityEngine.ParticleSystem;
 
 public class Turret : Tower
 {
     public GameObject Guns;
     public GameObject RotationPole;
     public GameObject RadiusSphere;
+    public ParticleSystem Particles;
+    public ParticleSystem Bullet;
     public GameObject target;
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
+    public List<ParticleSystem> particles = new List<ParticleSystem>();
     private bool shooting = false;
     IEnumerator couroutine;
 
@@ -33,11 +37,46 @@ public class Turret : Tower
         type = Type.OFFENSIVE;
     }
 
+
+    void AddParticle(Vector3 temp_pos, Quaternion temp_rot)
+    {
+        particles.Add(Instantiate(Particles, temp_pos, temp_rot, transform.parent));
+        particles[particles.Count-1].Play();
+        particles.Add(Instantiate(Bullet, temp_pos, temp_rot, transform.parent));
+        particles[particles.Count-1].Play();
+    }
     private IEnumerator Attack(float speed)
     {
         yield return new WaitForSeconds(speed);
         shooting = false;
-        //Debug.DrawLine(Guns.transform.position, target.transform.position, Color.red, 0.1f, false);
+        Vector3 temp_pos = new Vector3();
+        Quaternion temp_rot = new Quaternion();
+        temp_pos = Guns.transform.position - Guns.transform.right;
+        temp_rot = Quaternion.Euler(new Vector3(Guns.transform.rotation.eulerAngles.x - 90, Guns.transform.rotation.eulerAngles.y + 90, Guns.transform.rotation.eulerAngles.z));
+        bool add_particle = true;
+
+        for (int i = 0; i < particles.Count; i++)
+        {
+            if (!particles[i].isPlaying && !particles[i + 1].isPlaying)
+            {
+                add_particle = false;
+                particles[i].transform.position = temp_pos;
+                particles[i].transform.rotation = temp_rot;
+                particles[i].time = 0;
+                particles[i].Play();
+                particles[i+1].transform.position = temp_pos;
+                particles[i+1].transform.rotation = temp_rot;
+                particles[i+1].time = 0;
+                particles[i+1].Play();
+                break;
+            }
+        }
+
+        if (add_particle)
+        {
+            AddParticle(temp_pos, temp_rot);
+        }
+
         Debug.DrawRay(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized * 1000, Color.red, 0.1f);
         Debug.Log("Shoot!!");
     }
@@ -45,7 +84,7 @@ public class Turret : Tower
     void Update()
     {
         Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z), Color.red);
-        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius*0.5)
+        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius * 0.5)
             cur_state = State.TARGETING;
         else
             cur_state = State.IDLE;
