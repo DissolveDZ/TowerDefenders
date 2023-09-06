@@ -27,6 +27,7 @@ public class SplineMesh : MonoBehaviour
 
     [SerializeField]
     private float height;
+    float sum = 0;
 
     public MeshFilter mesh_filter;
 
@@ -54,7 +55,18 @@ public class SplineMesh : MonoBehaviour
     {
         GetVerts();
         BuildMesh();
+        Debug.Log("changed");
     }
+    private void Update()
+    {
+        // I had to make a variable called current_sum because unity doesn't let me check for the sum in the if statement
+        float current_sum = width + steps;
+        // check if any values changed
+        if (sum != current_sum)
+            OnSplineChanged(null, 0, new SplineModification());
+        sum = current_sum;
+    }
+
     private void GetVerts()
     {
         positions_left = new List<Vector3>();

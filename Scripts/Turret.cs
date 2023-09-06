@@ -12,9 +12,11 @@ public class Turret : Tower
     public GameObject target;
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
+    private bool shooting = false;
+    IEnumerator couroutine;
 
     [SerializeField]
-    [Range(0f, 40f)]
+    [Range(0f, 100f)]
     private float radius;
     float look_lerp = 0f;
     enum State
@@ -28,10 +30,21 @@ public class Turret : Tower
     {
         ID = Camera.main.GetComponent<TowerDefenseMain>().AddBuilding(gameObject);
         selected = false;
+        type = Type.OFFENSIVE;
+    }
+
+    private IEnumerator Attack(float speed)
+    {
+        yield return new WaitForSeconds(speed);
+        shooting = false;
+        //Debug.DrawLine(Guns.transform.position, target.transform.position, Color.red, 0.1f, false);
+        Debug.DrawRay(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized * 1000, Color.red, 0.1f);
+        Debug.Log("Shoot!!");
     }
 
     void Update()
     {
+        Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z), Color.red);
         if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius*0.5)
             cur_state = State.TARGETING;
         else
@@ -54,7 +67,18 @@ public class Turret : Tower
                 float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
                 desired_rot = new Vector3(-90, 0, -angle);
                 look_lerp = Mathf.Lerp(look_lerp, 0f, 1f * Time.deltaTime);
+                if (!shooting)
+                {
+                    couroutine = Attack(0.25f);
+                    shooting = true;
+                    StartCoroutine(couroutine);
+                }
                 break;
+        }
+        if (cur_state != State.TARGETING && shooting)
+        {
+            shooting = false;
+            StopCoroutine(couroutine);
         }
         RadiusSphere.transform.localScale = new Vector3(radius, radius, radius);
         RotationPole.transform.rotation = Quaternion.Lerp(RotationPole.transform.rotation, Quaternion.Euler(desired_rot), 7.5f * Time.deltaTime);

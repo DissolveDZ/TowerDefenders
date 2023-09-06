@@ -12,12 +12,8 @@ public class Tower : MonoBehaviour
         ECO,
         DEFENSIVE,
         OFFENSIVE
-    } Type type = Type.NONE;
-
-    void Start()
-    {
-        
-    }
+    } 
+    public Type type = Type.NONE;
 
     void Update()
     {
