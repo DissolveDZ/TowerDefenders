@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities.UniversalDelegates;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.Splines;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.ParticleSystem;
 
 public class Turret : Tower
@@ -13,7 +16,7 @@ public class Turret : Tower
     public GameObject RadiusSphere;
     public ParticleSystem Particles;
     public ParticleSystem Bullet;
-    public GameObject target;
+    public GameObject cur_target;
     public Vector3 desired_rot;
     public Vector3 gun_rotation;
     public List<ParticleSystem> particles = new List<ParticleSystem>();
@@ -35,6 +38,13 @@ public class Turret : Tower
     }
     State cur_state = State.IDLE;
 
+    public enum ShootMode
+    {
+        FIRST,
+        LAST,
+        CLOSEST
+    }
+    public ShootMode cur_mode = ShootMode.FIRST;
     private void Awake()
     {
         ID = Camera.main.GetComponent<TowerDefenseMain>().AddBuilding(gameObject);
@@ -84,7 +94,7 @@ public class Turret : Tower
         }
         // perform an actual raycast since the tower can attack multiple enemies at once
         RaycastHit ray_hit;
-        if (Physics.Raycast(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized, out ray_hit, Mathf.Infinity, enemy_layer))
+        if (Physics.Raycast(Guns.transform.position, (cur_target.transform.position - Guns.transform.position).normalized, out ray_hit, Mathf.Infinity, enemy_layer))
         {
             if (ray_hit.transform.parent.gameObject.TryGetComponent<Enemy>(out Enemy temp))
             {
@@ -92,23 +102,69 @@ public class Turret : Tower
             }
         }
 
-        Debug.DrawRay(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized * 1000, Color.red, 0.1f);
+        Debug.DrawRay(Guns.transform.position, (cur_target.transform.position - Guns.transform.position).normalized * 1000, Color.red, 0.1f);
         //Debug.Log("Shoot!!");
     }
 
     void Update()
     {
         Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z), Color.red);
-        if (Vector3.Distance(RotationPole.transform.position, target.transform.position) < radius * 0.5)
+        List<GameObject> enemies_ptr = Camera.main.GetComponent<TowerDefenseMain>().Enemies;
+        float dist = -1;
+        float min = -1;
+        int closest_index = -1;
+        cur_target = null;
+        for (int i = 0; i < enemies_ptr.Count; i++)
+        {
+            Enemy cur_enemy = enemies_ptr[i].GetComponent<Enemy>();
+            dist = Vector3.Distance(RotationPole.transform.position, cur_enemy.transform.position);
+            if (dist < radius * 0.5)
+            {
+                switch (cur_mode)
+                {
+                    default:
+                        dist = cur_enemy.GetComponent<SplineAnimate>().ElapsedTime;
+                        if (dist > min || min == -1)
+                        {
+                            closest_index = i;
+                            min = dist;
+                        }
+                        break;
+                    case ShootMode.LAST:
+                        dist = cur_enemy.GetComponent<SplineAnimate>().ElapsedTime;
+                        if (dist < min || min == -1)
+                        {
+                            closest_index = i;
+                            min = dist;
+                        }
+
+                        break;
+                    case ShootMode.CLOSEST:
+                        if (dist < min || min == -1)
+                        {
+                            closest_index = i;
+                            min = dist;
+                        }
+                        break;
+                }
+            }
+        }
+        if (closest_index != -1)
+            cur_target = enemies_ptr[closest_index];
+        if (cur_target != null && Vector3.Distance(RotationPole.transform.position, cur_target.transform.position) < radius * 0.5)
             cur_state = State.TARGETING;
         else
+        {
             cur_state = State.IDLE;
+        }
+
         if (selected)
         {
             RadiusSphere.SetActive(true);
         }
         else
             RadiusSphere.SetActive(false);
+
         switch (cur_state)
         {
             default:
@@ -117,7 +173,7 @@ public class Turret : Tower
                 gun_rotation = new Vector3(0, 0, 0);
                 break;
             case State.TARGETING:
-                Vector2 diff = new Vector2(RotationPole.transform.position.x - target.transform.position.x, RotationPole.transform.position.z - target.transform.position.z);
+                Vector2 diff = new Vector2(RotationPole.transform.position.x - cur_target.transform.position.x, RotationPole.transform.position.z - cur_target.transform.position.z);
                 float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
                 desired_rot = new Vector3(-90, 0, -angle);
                 look_lerp = Mathf.Lerp(look_lerp, 0f, 1f * Time.deltaTime);

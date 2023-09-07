@@ -12,8 +12,7 @@ using UnityEngine.UIElements;
 [ExecuteInEditMode]
 public class SplineMesh : MonoBehaviour
 {
-    [SerializeField]
-    private SplineContainer spline_container;
+    public SplineContainer spline_container;
 
     [SerializeField]
     private int spline_index;
