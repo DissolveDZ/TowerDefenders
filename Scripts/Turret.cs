@@ -17,6 +17,9 @@ public class Turret : Tower
     public Vector3 gun_rotation;
     public List<ParticleSystem> particles = new List<ParticleSystem>();
     private bool shooting = false;
+    public float damage = 10f;
+    [SerializeField]
+    int enemy_layer;
     IEnumerator couroutine;
 
     [SerializeField]
@@ -33,6 +36,7 @@ public class Turret : Tower
     private void Awake()
     {
         ID = Camera.main.GetComponent<TowerDefenseMain>().AddBuilding(gameObject);
+        enemy_layer = 1 << LayerMask.NameToLayer("Enemy");
         selected = false;
         type = Type.OFFENSIVE;
     }
@@ -40,10 +44,10 @@ public class Turret : Tower
 
     void AddParticle(Vector3 temp_pos, Quaternion temp_rot)
     {
-        particles.Add(Instantiate(Particles, temp_pos, temp_rot, transform.parent));
-        particles[particles.Count-1].Play();
-        particles.Add(Instantiate(Bullet, temp_pos, temp_rot, transform.parent));
-        particles[particles.Count-1].Play();
+        particles.Add(Instantiate(Particles, temp_pos, temp_rot, transform));
+        particles[particles.Count - 1].Play();
+        particles.Add(Instantiate(Bullet, temp_pos, temp_rot, transform));
+        particles[particles.Count - 1].Play();
     }
     private IEnumerator Attack(float speed)
     {
@@ -64,10 +68,10 @@ public class Turret : Tower
                 particles[i].transform.rotation = temp_rot;
                 particles[i].time = 0;
                 particles[i].Play();
-                particles[i+1].transform.position = temp_pos;
-                particles[i+1].transform.rotation = temp_rot;
-                particles[i+1].time = 0;
-                particles[i+1].Play();
+                particles[i + 1].transform.position = temp_pos;
+                particles[i + 1].transform.rotation = temp_rot;
+                particles[i + 1].time = 0;
+                particles[i + 1].Play();
                 break;
             }
         }
@@ -76,9 +80,20 @@ public class Turret : Tower
         {
             AddParticle(temp_pos, temp_rot);
         }
+        // perform an actual raycast since the tower can attack multiple enemies at once
+        RaycastHit ray_hit;
+        if (Physics.Raycast(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized, out ray_hit, Mathf.Infinity, enemy_layer))
+        {
+            print(ray_hit.collider.name);
+            print("yes");
+            if (ray_hit.transform.parent.gameObject.TryGetComponent<Enemy>(out Enemy temp))
+            {
+                temp.health -= 10;
+            }
+        }
 
         Debug.DrawRay(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized * 1000, Color.red, 0.1f);
-        Debug.Log("Shoot!!");
+        //Debug.Log("Shoot!!");
     }
 
     void Update()

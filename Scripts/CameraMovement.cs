@@ -78,10 +78,6 @@ public class CameraMovement : MonoBehaviour
 
     void Update()
     {
-        // bit shift layer mask
-        int layerMask = 1 << 8;
-        layerMask = ~layerMask;
-
         mouse_pos = Input.mousePosition;
         // Add mouse delta to the mouse position
         if (Input.GetMouseButton(2))
@@ -92,7 +88,7 @@ public class CameraMovement : MonoBehaviour
         zoom_dist = Mathf.Clamp(zoom_dist, 0.5f, 100);
         cur_cam.transform.position = Vector3.Lerp(cur_cam.transform.position, cam_desired - cur_cam.transform.forward * (zoom_dist * zoom_dist) - cur_cam.transform.forward * zoom_offset, cam_lerp * Time.deltaTime);
         ray = Camera.main.ScreenPointToRay(mouse_pos);
-        // Raycast
+        // Raycast for 3D "cursor" and selecting
         if (Physics.Raycast(ray, out ray_hit, Mathf.Infinity))
         {
             sphere.transform.position = ray_hit.point;

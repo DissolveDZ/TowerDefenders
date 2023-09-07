@@ -1601,7 +1601,7 @@ ParticleSystem:
     z:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 250
+      scalar: 62.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -4777,7 +4777,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3df4f76731e257145aa1eff3e5f7eb49, type: 2}
+  - {fileID: 2100000, guid: 629bdeeea0a5750448dbbb724eb9067f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4995,6 +4995,7 @@ MonoBehaviour:
   target: {fileID: 0}
   desired_rot: {x: 0, y: 0, z: 0}
   gun_rotation: {x: 0, y: 0, z: 0}
+  particles: []
   radius: 10
 --- !u!1 &4342090118809414304
 GameObject:
