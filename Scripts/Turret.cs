@@ -86,8 +86,6 @@ public class Turret : Tower
         RaycastHit ray_hit;
         if (Physics.Raycast(Guns.transform.position, (target.transform.position - Guns.transform.position).normalized, out ray_hit, Mathf.Infinity, enemy_layer))
         {
-            print(ray_hit.collider.name);
-            print("yes");
             if (ray_hit.transform.parent.gameObject.TryGetComponent<Enemy>(out Enemy temp))
             {
                 temp.health -= damage;
