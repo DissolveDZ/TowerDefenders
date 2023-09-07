@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering.HighDefinition;
 using static UnityEngine.ParticleSystem;
 
@@ -18,6 +19,7 @@ public class Turret : Tower
     public List<ParticleSystem> particles = new List<ParticleSystem>();
     private bool shooting = false;
     public float damage = 10f;
+    public float firing_speed = 0.25f;
     [SerializeField]
     int enemy_layer;
     IEnumerator couroutine;
@@ -88,7 +90,7 @@ public class Turret : Tower
             print("yes");
             if (ray_hit.transform.parent.gameObject.TryGetComponent<Enemy>(out Enemy temp))
             {
-                temp.health -= 10;
+                temp.health -= damage;
             }
         }
 
@@ -123,7 +125,7 @@ public class Turret : Tower
                 look_lerp = Mathf.Lerp(look_lerp, 0f, 1f * Time.deltaTime);
                 if (!shooting)
                 {
-                    couroutine = Attack(0.25f);
+                    couroutine = Attack(firing_speed);
                     shooting = true;
                     StartCoroutine(couroutine);
                 }
