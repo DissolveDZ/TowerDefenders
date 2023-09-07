@@ -4839,7 +4839,6 @@ GameObject:
   - component: {fileID: 2877179187701752651}
   - component: {fileID: 3378010000864693322}
   - component: {fileID: 917744502657324900}
-  - component: {fileID: 7305865207376189128}
   m_Layer: 2
   m_Name: Radius Sphere
   m_TagString: Untagged
@@ -4912,27 +4911,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &7305865207376189128
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3473992181730670652}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4037712748997365494
 GameObject:
   m_ObjectHideFlags: 0
@@ -4996,6 +4974,9 @@ MonoBehaviour:
   desired_rot: {x: 0, y: 0, z: 0}
   gun_rotation: {x: 0, y: 0, z: 0}
   particles: []
+  damage: 10
+  firing_speed: 0.25
+  enemy_layer: 0
   radius: 10
 --- !u!1 &4342090118809414304
 GameObject:
